@@ -90,146 +90,148 @@ public class OIDCInterceptor extends InterceptorAdapter {
 			}
 		}
 
-		if (theRequestDetails.getRestOperationType() == RestOperationTypeEnum.METADATA) {
-			ourLog.debug("This is METADATA request.");
+		return true;
 
-			// Enumeration<String> headerNames = theRequest.getHeaderNames();
-			// while (headerNames.hasMoreElements()) {
-			// String headerName = headerNames.nextElement();
-			// System.out.println(headerName);
-			// Enumeration<String> headers = theRequest.getHeaders(headerName);
-			// while (headers.hasMoreElements()) {
-			// String headerValue = headers.nextElement();
-			// System.out.println(" "+headerValue);
-			// }
-			// }
-
-			// StringBuilder buffer = new StringBuilder();
-			// BufferedReader reader;
-			// try {
-			// reader = theRequest.getReader();
-			// String line;
-			// while ((line=reader.readLine())!=null) {
-			// buffer.append(line);
-			// }
-			//
-			// System.out.println("METADATA request getbody:
-			// "+buffer.toString());
-			//
-			// } catch (IOException e) {
-			// // TODO Auto-generated catch block
-			// e.printStackTrace();
-			// }
-			//
-
-			return true;
-		}
-
-//		// Quick Hack for request from localhost overlay site.
-//		if (localByPass.equalsIgnoreCase("True")) {
-//			ourLog.debug("remoteAddress:"+theRequest.getRemoteAddr()+", localAddress:"+theRequest.getLocalAddr());
-//			if (theRequest.getRemoteAddr().equalsIgnoreCase("127.0.0.1")
-//					|| theRequest.getRemoteAddr().equalsIgnoreCase("0:0:0:0:0:0:0:1")) {
+//		if (theRequestDetails.getRestOperationType() == RestOperationTypeEnum.METADATA) {
+//			ourLog.debug("This is METADATA request.");
+//
+//			// Enumeration<String> headerNames = theRequest.getHeaderNames();
+//			// while (headerNames.hasMoreElements()) {
+//			// String headerName = headerNames.nextElement();
+//			// System.out.println(headerName);
+//			// Enumeration<String> headers = theRequest.getHeaders(headerName);
+//			// while (headers.hasMoreElements()) {
+//			// String headerValue = headers.nextElement();
+//			// System.out.println(" "+headerValue);
+//			// }
+//			// }
+//
+//			// StringBuilder buffer = new StringBuilder();
+//			// BufferedReader reader;
+//			// try {
+//			// reader = theRequest.getReader();
+//			// String line;
+//			// while ((line=reader.readLine())!=null) {
+//			// buffer.append(line);
+//			// }
+//			//
+//			// System.out.println("METADATA request getbody:
+//			// "+buffer.toString());
+//			//
+//			// } catch (IOException e) {
+//			// // TODO Auto-generated catch block
+//			// e.printStackTrace();
+//			// }
+//			//
+//
+//			return true;
+//		}
+//
+////		// Quick Hack for request from localhost overlay site.
+////		if (localByPass.equalsIgnoreCase("True")) {
+////			ourLog.debug("remoteAddress:"+theRequest.getRemoteAddr()+", localAddress:"+theRequest.getLocalAddr());
+////			if (theRequest.getRemoteAddr().equalsIgnoreCase("127.0.0.1")
+////					|| theRequest.getRemoteAddr().equalsIgnoreCase("0:0:0:0:0:0:0:1")) {
+////				return true;
+////			}
+////
+////			if (theRequest.getLocalAddr().equalsIgnoreCase(theRequest.getRemoteAddr())) {
+////				return true;
+////			}
+////
+////			// When this is deployed in docker container and/or with some proxies,
+////			// we may set manual server address, which caused all traffics forwarded by proxy.
+////			// If the match above fails, we may still be coming from local
+////			String[] remoteAddrs = theRequest.getRemoteAddr().split("\\.");
+////			String[] localAddrs = theRequest.getLocalAddr().split("\\.");
+////			if (remoteAddrs.length == 4 && localAddrs.length == 4) {
+////				ourLog.debug("remoteAddrs[0]="+remoteAddrs[0]+", remoteAddrs[1]="+remoteAddrs[1]+" , localAddrs[0]="+localAddrs[0]+", localAddrs[1]="+localAddrs[1]);
+////				if (remoteAddrs[0].equals(localAddrs[0]) && remoteAddrs[1].equals(localAddrs[1])) {
+////					return true;
+////				}
+////			}
+////		}
+//
+////		if (authBasic.equalsIgnoreCase("None")) {
+////			ourLog.debug("[OAuth] OAuth is disabled. Request from " + theRequest.getRemoteAddr() + "is approved");
+////			return true;
+////		}
+//
+//		String authHeader = theRequest.getHeader("Authorization");
+//		if (authHeader == null || authHeader.isEmpty() || authHeader.length() < 6) {
+//			if ("None".equals(getAuthBasic()) && "None".equals(getAuthBearer())) {
+//				// We turned of the authorization.
 //				return true;
 //			}
 //
-//			if (theRequest.getLocalAddr().equalsIgnoreCase(theRequest.getRemoteAddr())) {
+//			AuthenticationException ex = new AuthenticationException("No or Invalid Authorization Header");
+//			ex.addAuthenticateHeaderForRealm("OmopOnFhir");
+//			throw ex;
+//		}
+//
+//		// Check if basic auth.
+//		String prefix = authHeader.substring(0, 6);
+//		if ("basic ".equalsIgnoreCase(prefix)) {
+//			String[] basicCredential = authBasic.split(":");
+//			if (basicCredential.length != 2) {
+//				AuthenticationException ex = new AuthenticationException("Basic Authorization Setup Incorrectly");
+//				ex.addAuthenticateHeaderForRealm("OmopOnFhir");
+//				throw ex;
+//			}
+//			String username = basicCredential[0];
+//			String password = basicCredential[1];
+//
+//			String base64 = authHeader.substring(6);
+//
+//			String base64decoded = new String(Base64.decodeBase64(base64));
+//			String[] parts = base64decoded.split(":");
+//
+//			if (username.equals(parts[0]) && password.equals(parts[1])) {
+//				ourLog.debug("[Basic Auth] Auth is granted with " + username + " and " + password);
 //				return true;
 //			}
-//			
-//			// When this is deployed in docker container and/or with some proxies,
-//			// we may set manual server address, which caused all traffics forwarded by proxy.
-//			// If the match above fails, we may still be coming from local
-//			String[] remoteAddrs = theRequest.getRemoteAddr().split("\\.");
-//			String[] localAddrs = theRequest.getLocalAddr().split("\\.");
-//			if (remoteAddrs.length == 4 && localAddrs.length == 4) {
-//				ourLog.debug("remoteAddrs[0]="+remoteAddrs[0]+", remoteAddrs[1]="+remoteAddrs[1]+" , localAddrs[0]="+localAddrs[0]+", localAddrs[1]="+localAddrs[1]);
-//				if (remoteAddrs[0].equals(localAddrs[0]) && remoteAddrs[1].equals(localAddrs[1])) {
-//					return true;
-//				}
+//
+//			AuthenticationException ex = new AuthenticationException("Incorrect Username and Password");
+//			ex.addAuthenticateHeaderForRealm("OmopOnFhir");
+//			throw ex;
+//		} else if ("bearer".equalsIgnoreCase(prefix)) {
+//			// checking Auth
+//			ourLog.debug("IntrospectURL:" + getIntrospectUrl() + " with Basic " + getAuthBasic());
+//			Authorization myAuth = new Authorization(getIntrospectUrl(), getAuthBasic());
+//
+//			String err_msg = myAuth.introspectToken(theRequest);
+//			if (err_msg.isEmpty() == false) {
+//				ourLog.debug("IntrospectToken failed with "+err_msg);
+//				throw new AuthenticationException(err_msg);
 //			}
-//		}
-
-//		if (authBasic.equalsIgnoreCase("None")) {
-//			ourLog.debug("[OAuth] OAuth is disabled. Request from " + theRequest.getRemoteAddr() + "is approved");
+//
+//			// Now we have a valid access token. Now, check Token type
+//			if (myAuth.checkBearer() == false) {
+//				ourLog.debug("IntrospectToken failed. Not Token Bearer");
+//				throw new AuthenticationException("Not Token Bearer");
+//			}
+//
+//			// Check scope.
+//			// Fine grain checking should be done after request is parsed. Save
+//			// this auth to smartOnFhir attribute.
+//			ourLog.debug("Adding auth object to RequestDetails attribute");
+//			theRequestDetails.setAttribute(OIDCInterceptor.authKeyName, myAuth);
+//
 //			return true;
+////			return myAuth.allowRequest(theRequestDetails);
+//		} else {
+//			AuthenticationException ex = new AuthenticationException("No Valid Authorization Header Found");
+//			ex.addAuthenticateHeaderForRealm("OmopOnFhir");
+//			throw ex;
 //		}
-
-		String authHeader = theRequest.getHeader("Authorization");
-		if (authHeader == null || authHeader.isEmpty() || authHeader.length() < 6) {
-			if ("None".equals(getAuthBasic()) && "None".equals(getAuthBearer())) {
-				// We turned of the authorization.
-				return true;
-			}
-			
-			AuthenticationException ex = new AuthenticationException("No or Invalid Authorization Header");
-			ex.addAuthenticateHeaderForRealm("OmopOnFhir");
-			throw ex;
-		}
-
-		// Check if basic auth.
-		String prefix = authHeader.substring(0, 6);
-		if ("basic ".equalsIgnoreCase(prefix)) {
-			String[] basicCredential = authBasic.split(":");
-			if (basicCredential.length != 2) {
-				AuthenticationException ex = new AuthenticationException("Basic Authorization Setup Incorrectly");
-				ex.addAuthenticateHeaderForRealm("OmopOnFhir");
-				throw ex;
-			}
-			String username = basicCredential[0];
-			String password = basicCredential[1];
-
-			String base64 = authHeader.substring(6);
-
-			String base64decoded = new String(Base64.decodeBase64(base64));
-			String[] parts = base64decoded.split(":");
-
-			if (username.equals(parts[0]) && password.equals(parts[1])) {
-				ourLog.debug("[Basic Auth] Auth is granted with " + username + " and " + password);
-				return true;
-			}
-
-			AuthenticationException ex = new AuthenticationException("Incorrect Username and Password");
-			ex.addAuthenticateHeaderForRealm("OmopOnFhir");
-			throw ex;
-		} else if ("bearer".equalsIgnoreCase(prefix)) {
-			// checking Auth
-			ourLog.debug("IntrospectURL:" + getIntrospectUrl() + " with Basic " + getAuthBasic());
-			Authorization myAuth = new Authorization(getIntrospectUrl(), getAuthBasic());
-
-			String err_msg = myAuth.introspectToken(theRequest);
-			if (err_msg.isEmpty() == false) {
-				ourLog.debug("IntrospectToken failed with "+err_msg);
-				throw new AuthenticationException(err_msg);
-			}
-
-			// Now we have a valid access token. Now, check Token type
-			if (myAuth.checkBearer() == false) {
-				ourLog.debug("IntrospectToken failed. Not Token Bearer");
-				throw new AuthenticationException("Not Token Bearer");
-			}
-
-			// Check scope.
-			// Fine grain checking should be done after request is parsed. Save
-			// this auth to smartOnFhir attribute.
-			ourLog.debug("Adding auth object to RequestDetails attribute");
-			theRequestDetails.setAttribute(OIDCInterceptor.authKeyName, myAuth);
-
-			return true;
-//			return myAuth.allowRequest(theRequestDetails);				
-		} else {
-			AuthenticationException ex = new AuthenticationException("No Valid Authorization Header Found");
-			ex.addAuthenticateHeaderForRealm("OmopOnFhir");
-			throw ex;
-		}
-
-		// for test.
-		// String resourceName = theRequestDetails.getResourceName();
-		// String resourceOperationType =
-		// theRequestDetails.getResourceOperationType().name();
-		// System.out.println ("resource:"+resourceName+",
-		// resourceOperationType:"+resourceOperationType);
-
+//
+//		// for test.
+//		// String resourceName = theRequestDetails.getResourceName();
+//		// String resourceOperationType =
+//		// theRequestDetails.getResourceOperationType().name();
+//		// System.out.println ("resource:"+resourceName+",
+//		// resourceOperationType:"+resourceOperationType);
+//
 	}
 
 	@Override
